@@ -11,6 +11,7 @@ import pandas as pd
 
 # Chemin vers le dossier data/ (relatif à la racine du projet)
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
+MASTER_FILENAME = 'master.csv'
 
 
 def load_raw_tables(data_dir: str = DATA_DIR) -> dict:
@@ -148,6 +149,23 @@ def build_master_dataframe(tables: dict) -> pd.DataFrame:
     return df
 
 
+def save_master_dataframe(df: pd.DataFrame, data_dir: str = DATA_DIR) -> str:
+    """
+    Sauvegarde le DataFrame maître dans le dossier data/ sous le nom master.csv.
+
+    Args:
+        df: DataFrame maître à sauvegarder.
+        data_dir: Dossier cible pour la sauvegarde.
+
+    Returns:
+        str: Chemin du fichier master.csv créé.
+    """
+    output_path = os.path.join(data_dir, MASTER_FILENAME)
+    df.to_csv(output_path, index=False)
+    print(f"💾 Fichier maître enregistré : {output_path}")
+    return output_path
+
+
 def load_data(data_dir: str = DATA_DIR) -> pd.DataFrame:
     """
     Point d'entrée principal : charge et fusionne toutes les tables.
@@ -163,4 +181,5 @@ def load_data(data_dir: str = DATA_DIR) -> pd.DataFrame:
     tables = load_raw_tables(data_dir)
     print("\n🔗 Fusion des tables...")
     df = build_master_dataframe(tables)
+    save_master_dataframe(df, data_dir=data_dir)
     return df
