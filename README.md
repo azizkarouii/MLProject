@@ -65,8 +65,8 @@ olist-return-refund-propensity/
 
 ### 1. Cloner le repository
 ```bash
-git clone https://github.com/<ton-username>/olist-return-refund-propensity.git
-cd olist-return-refund-propensity
+git clone https://github.com/azizkarouii/MLProject.git
+cd MLProject
 ```
 
 ### 2. Créer un environnement virtuel
