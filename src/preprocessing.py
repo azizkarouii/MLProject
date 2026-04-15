@@ -116,16 +116,13 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
 
 def create_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Crée de nouvelles variables explicatives (features) à partir
-    des colonnes existantes, notamment à partir des dates.
+        Crée des variables explicatives disponibles avant la livraison.
 
         Features créées :
-      - delivery_delay_days  : retard de livraison (peut être négatif si en avance)
-      - processing_days      : délai entre commande et expédition
-      - freight_ratio        : part des frais de port dans le prix total
-      - price_per_item       : prix moyen par article commandé
-            - was_delivered        : indicateur de livraison effective
-            - review_missing       : indicateur de review absente
+            - freight_ratio        : part des frais de port dans le prix total
+            - price_per_item       : prix moyen par article commandé
+            - purchase_month       : mois d'achat (saisonnalité)
+            - purchase_day_of_week : jour de semaine d'achat
 
     Args:
         df: DataFrame après nettoyage.
@@ -133,22 +130,6 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame enrichi avec les nouvelles features.
     """
-    # --- Délai de livraison : livraison réelle vs. livraison promise ---
-    # Positif = retard, Négatif = livraison en avance
-    df['delivery_delay_days'] = (
-        df['order_delivered_customer_date'] - df['order_estimated_delivery_date']
-    ).dt.days
-
-    # --- Délai de traitement : entre la commande et l'expédition ---
-    df['processing_days'] = (
-        df['order_delivered_carrier_date'] - df['order_purchase_timestamp']
-    ).dt.days
-
-    # Pour les commandes non livrées, ces délais sont absents :
-    # on les remplace par 0 et on conserve l'information via was_delivered.
-    df['delivery_delay_days'] = df['delivery_delay_days'].fillna(0)
-    df['processing_days'] = df['processing_days'].fillna(0)
-
     # --- Ratio frais de port : freight / prix total ---
     # On évite la division par zéro avec np.where
     df['freight_ratio'] = np.where(
@@ -164,10 +145,6 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
         0
     )
 
-    # --- Indicateurs utiles pour le risque de retour/remboursement ---
-    df['was_delivered'] = (df['order_status'] == 'delivered').astype(int)
-    df['review_missing'] = df['review_score'].isna().astype(int)
-
     # --- Mois d'achat (saisonnalité) ---
     df['purchase_month'] = df['order_purchase_timestamp'].dt.month
 
@@ -175,8 +152,8 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
     df['purchase_day_of_week'] = df['order_purchase_timestamp'].dt.dayofweek
 
     print(
-        "  ✅ 8 nouvelles features créées : delivery_delay_days, processing_days, "
-        "freight_ratio, price_per_item, was_delivered, review_missing, "
+        "  ✅ 4 nouvelles features créées : "
+        "freight_ratio, price_per_item, "
         "purchase_month, purchase_day_of_week"
     )
 
@@ -187,10 +164,12 @@ def create_return_refund_target(df: pd.DataFrame) -> pd.DataFrame:
     """
     Crée la variable cible binaire 'is_return_refund_risk'.
 
-    Définition (proxy métier sur Olist) :
-      - 1 si la commande est annulée/non disponible
-      - OU si la review est très faible (<= 2), indicateur d'expérience critique
-      - 0 sinon
+        Définition (proxy pré-livraison sur Olist) :
+            - 1 si la commande est annulée/non disponible
+            - 0 sinon
+
+        Cette définition évite l'usage de signaux post-livraison (ex: review_score)
+        pour rester cohérent avec une prédiction avant livraison.
 
     Args:
         df: DataFrame nettoyé.
@@ -199,8 +178,7 @@ def create_return_refund_target(df: pd.DataFrame) -> pd.DataFrame:
         DataFrame avec la colonne is_return_refund_risk (0 ou 1).
     """
     status_risk = df['order_status'].isin(['canceled', 'unavailable'])
-    review_risk = df['review_score'].fillna(5) <= 2
-    df['is_return_refund_risk'] = (status_risk | review_risk).astype(int)
+    df['is_return_refund_risk'] = status_risk.astype(int)
 
     # Afficher la distribution des classes
     counts = df['is_return_refund_risk'].value_counts()
@@ -258,8 +236,8 @@ def select_features(df: pd.DataFrame) -> tuple:
     """
     Sélectionne les colonnes finales utilisées pour l'entraînement des modèles.
 
-    Features retenues :
-      - Variables temporelles dérivées (délais, mois, jour)
+        Features retenues :
+            - Variables temporelles d'achat (mois, jour)
       - Variables financières (prix, frais de port, ratio)
       - Variables produit (poids, photos)
       - Variables catégorielles encodées
@@ -271,13 +249,9 @@ def select_features(df: pd.DataFrame) -> tuple:
         tuple: (X, y) où X est le DataFrame des features, y la série cible.
     """
     feature_columns = [
-        # Features temporelles
-        'delivery_delay_days',
-        'processing_days',
+        # Features temporelles d'achat
         'purchase_month',
         'purchase_day_of_week',
-        'was_delivered',
-        'review_missing',
 
         # Features financières
         'total_price',

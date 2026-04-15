@@ -26,8 +26,8 @@ caractéristiques des produits, et avis clients.
 > **Peut-on prédire quelles commandes sont à risque de retour/remboursement ?**
 
 La variable cible est `is_return_refund_risk` (classification binaire).
-Proxy utilisé dans ce projet :
-- `1` → commande à risque élevé (commande annulée/non disponible, ou review très faible)
+Proxy utilisé dans ce projet (pré-livraison) :
+- `1` → commande à risque élevé (commande annulée/non disponible)
 - `0` → commande à faible risque
 
 Cette problématique est utile pour Olist : anticiper les commandes risquées, améliorer le fulfillment,
@@ -106,7 +106,7 @@ Ouvre d'abord `notebooks/01_EDA.ipynb`, puis `notebooks/02_Modeling.ipynb`.
 
 **Meilleur modèle** : Random Forest (à confirmer après exécution)
 
-**Features les plus importantes** : délai de livraison, délai de traitement, ratio frais de port, variables paiement
+**Features les plus importantes** : ratio frais de port, variables paiement, volume d'articles, variables produit
 
 ---
 
@@ -114,10 +114,10 @@ Ouvre d'abord `notebooks/01_EDA.ipynb`, puis `notebooks/02_Modeling.ipynb`.
 
 | Feature | Description |
 |---|---|
-| `delivery_delay_days` | Nb de jours de retard vs. date estimée |
-| `processing_days` | Délai entre commande et expédition |
 | `freight_ratio` | Frais de port / prix total |
 | `price_per_item` | Prix moyen par article de la commande |
+| `purchase_month` | Mois d'achat de la commande |
+| `purchase_day_of_week` | Jour de semaine d'achat |
 | `is_return_refund_risk` | Variable cible binaire de risque return/refund |
 
 ---
