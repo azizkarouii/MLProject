@@ -2,7 +2,7 @@
 
 ## 👤 Auteur
 <!-- Remplace par ton nom -->
-Prénom NOM — [Ton université / Formation]
+Khemais Abdallah — [Ecole Polytechnique Sousse / Genie Informatique]
 
 ---
 
