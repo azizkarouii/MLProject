@@ -1,8 +1,7 @@
 # Return/Refund Propensity Classification — Olist E-Commerce
 
 ## 👤 Auteur
-<!-- Remplace par ton nom -->
-Khemais Abdallah — [Ecole Polytechnique Sousse / Genie Informatique]
+Mohamed Aziz Karoui & Wassim Sioud — [Ecole Polytechnique Sousse / Genie Informatique]
 
 ---
 
