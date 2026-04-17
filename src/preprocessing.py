@@ -250,14 +250,14 @@ def select_features(df: pd.DataFrame) -> tuple:
     """
     feature_columns = [
         # Features temporelles d'achat
-        'purchase_month',
-        'purchase_day_of_week',
+        'purchase_month',#nouveau
+        'purchase_day_of_week',#nouveau
 
         # Features financières
         'total_price',
         'total_freight',
-        'freight_ratio',
-        'price_per_item',
+        'freight_ratio',#nouveau
+        'price_per_item',#nouveau
         'payment_value',
         'payment_installments',
 
@@ -269,9 +269,9 @@ def select_features(df: pd.DataFrame) -> tuple:
         'product_photos_qty',
 
         # Features catégorielles encodées
-        'payment_type_encoded',
-        'customer_state_encoded',
-        'product_category_name_english_encoded',
+        'payment_type_encoded',#nouveau
+        'customer_state_encoded',#nouveau
+        'product_category_name_english_encoded',#nouveau
     ]
 
     # Ne conserver que les colonnes effectivement présentes dans le DataFrame
